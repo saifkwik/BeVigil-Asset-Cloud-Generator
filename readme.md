@@ -21,5 +21,5 @@ clone the repo and run main.py
 
 Run main.py to see or view the wordcloud generated from the report
 
-![alt text](C:\Users\Rango\PycharmProjects\bevigil_asset_cloud_generator\Screenshot.png)
+![alt text](https://github.com/saifkwik/bevigil_asset_cloud_generator/blob/7358f23c6f3a32eb508110de6015300f70e834e7/Screenshot.png)
 
