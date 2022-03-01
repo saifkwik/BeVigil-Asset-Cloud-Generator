@@ -42,8 +42,7 @@ print(assets)
 
 # Converting the list to dictionary to make it readable for wordcloud
 freq = to_dict(assets)
-print(freq)
-
+print(sorted(freq.items(), key=lambda x: x[1], reverse=True))
 # wordcloud
 wordcloud = WordCloud(width=1000, height=500).generate_from_frequencies(freq)
 
