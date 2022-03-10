@@ -3,6 +3,11 @@ import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 import re
 import pandas as pd
+import pprint
+
+# your csv file path
+file_path = 'C:\\Users\\Rango\\Documents\\bgmi.csv'
+assert '.csv' in file_path, 'Verify the path of the CSV file'
 
 
 # function to convert string to list
@@ -29,20 +34,19 @@ def to_dict(assets):
             frequencies[word] += 1
     return frequencies
 
-#function to count no. of unique elements
+
+# function to count no. of unique elements
 def get_no_of_elements(l):
     count = 0
     for element in l:
         count += 1
     return count
 
-# your csv file path
-file_path = 'csv_file_path'
 
 # extracting the index of the hostname from the downloaded Report.csv file
 df = pd.read_csv(file_path, usecols=['Rule'])
 column_of_interest = df['Rule']
-print(type(column_of_interest))
+pprint.pprint(type(column_of_interest))
 data = column_of_interest.to_dict()
 
 for k, v in data.items():
@@ -61,7 +65,7 @@ assets = domain_extract(file)
 # Converting the list to dictionary and removing empty key values (if any) to make it readable for wordcloud
 freq = to_dict(assets)
 freq = dict([(k, v) for k, v in freq.items() if len(k) > 0])
-print(sorted(freq.items(), key=lambda x: x[1], reverse=True))
+pprint.pprint(sorted(freq.items(), key=lambda x: x[1], reverse=True))
 
 # wordcloud
 wordcloud = WordCloud(width=1000, height=500).generate_from_frequencies(freq)
@@ -82,7 +86,7 @@ ip_addr = []
 for unique_ip in ip_addresses:
     if unique_ip not in ip_addr:
         ip_addr.append(unique_ip)
-print(ip_addr)
+pprint.pprint(ip_addr)
 
 # generating a Report.txt in the working directory
 with open("Generated_report.txt", 'w') as f:
@@ -93,4 +97,7 @@ with open("Generated_report.txt", 'w') as f:
         f.write('%s:%s\n' % (key, value))
     f.write('\n Unique IP addresses found in file: \n\n')
     f.write(str(ip_addr))
-print('File generated successfully!')
+pprint.pprint("Unique Hostnames found: " + str(get_no_of_elements(freq)))
+pprint.pprint("Unique IP found: " + str(get_no_of_elements(ip_addr)))
+pprint.pprint('Report generated successfully!(in current working directory)')
+
