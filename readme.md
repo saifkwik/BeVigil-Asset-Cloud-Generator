@@ -19,5 +19,5 @@ Run main.py to :
 * Generate and save Wordcloud image of the output
 
 
-![alt text](https://github.com/saifkwik/bevigil_asset_cloud_generator/blob/main/gov-nasa.png)
+![alt text](https://github.com/saifkwik/bevigil_asset_cloud_generator/blob/main/gov_nasa.png)
 
