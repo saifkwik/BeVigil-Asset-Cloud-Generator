@@ -86,7 +86,7 @@ pprint.pprint("Unique Hostnames found: " + str(get_no_of_elements(hosts)))
 pprint.pprint("Unique IP found: " + str(get_no_of_elements(ip)))
 
 # asking user if they want to generate a report
-answer = input("Do you want to Generate a report  (y/n): ").lower().strip()
+answer = input("Do you want to Generate a report(y/n): ").lower().strip()
 if answer == "y":
     # generating a Report.txt in the working directory
     with open(app_id.replace('.', '_') + "_report.txt", 'w') as f:
@@ -102,7 +102,7 @@ elif answer == "n":
     pass
 
 # asking user if they want to generate & save wordcloud
-answer = input("Do you want to  Display  & save the WorldCloud image(y/n): ").lower().strip()
+answer = input("Do you want to Display & save the WorldCloud image(y/n): ").lower().strip()
 if answer == "y":
     # wordcloud
     wordcloud = WordCloud(mode='RGBA',
