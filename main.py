@@ -1,13 +1,29 @@
+import requests
+import config
 import tldextract
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
-import re
-import pandas as pd
 import pprint
+from PIL import Image
 
-# your csv file path
-file_path = 'C:\\Users\\Rango\\Documents\\bgmi.csv'
-assert '.csv' in file_path, 'Verify the path of the CSV file'
+
+# retrieving assets from API
+def get_data(app_id):
+    api_base_url = f'http://osint.bevigil.com/api/'
+    endpoint_path = f'{app_id}/all-assets/'
+    headers = {
+        'X-Access-Token': config.api_key
+    }
+
+    endpoint = f'{api_base_url}{endpoint_path}'
+    pprint.pprint(endpoint)
+
+    r = requests.get(endpoint, headers=headers)
+
+    if r.status_code in range(200, 299):
+        contents = r.json()
+        data = contents.get('assets')
+        return data
 
 
 # function to convert string to list
@@ -43,61 +59,80 @@ def get_no_of_elements(l):
     return count
 
 
-# extracting the index of the hostname from the downloaded Report.csv file
-df = pd.read_csv(file_path, usecols=['Rule'])
-column_of_interest = df['Rule']
-pprint.pprint(type(column_of_interest))
-data = column_of_interest.to_dict()
+# app_id input from user
+app_id = input('Enter APP ID here (com.example.com) : ').lower().strip()
 
-for k, v in data.items():
-    if v == 'Hostname':
-        index = k  # k is the index of the hostname in csv file
 
-# saving the hostname row from csv file to the hostnames variable
-hostnames = pd.read_csv(file_path, sep=",")['Matched Files'][index]
-hostnames = re.sub("\(.*?\)", "", hostnames)
+data = get_data(app_id)
 
-file = convert(hostnames)
+try:
+    hostnames = data.get('host')
+except AttributeError as ae:
+    print('Invalid App Id: ' + app_id)
+    exit()
+
+ip = data.get('IP Address disclosure')
+pprint.pprint(ip)
 
 # storing the extracted domain names to the newlist
-assets = domain_extract(file)
+assets = domain_extract(hostnames)
 
 # Converting the list to dictionary and removing empty key values (if any) to make it readable for wordcloud
-freq = to_dict(assets)
-freq = dict([(k, v) for k, v in freq.items() if len(k) > 0])
-pprint.pprint(sorted(freq.items(), key=lambda x: x[1], reverse=True))
+hosts = to_dict(assets)
+hosts = dict([(k, v) for k, v in hosts.items() if len(k) > 0])
+pprint.pprint(sorted(hosts.items(), key=lambda x: x[1], reverse=True))
 
-# wordcloud
-wordcloud = WordCloud(width=1000, height=500).generate_from_frequencies(freq)
+pprint.pprint("Unique Hostnames found: " + str(get_no_of_elements(hosts)))
+pprint.pprint("Unique IP found: " + str(get_no_of_elements(ip)))
 
-# display wordcloud image
-plt.figure(figsize=(15, 8))
-plt.imshow(wordcloud)
-plt.axis('off')
-plt.show()
+# asking user if they want to generate a report
+answer = input("Do you want to Generate a report  (y/n): ").lower().strip()
+if answer == "y":
+    # generating a Report.txt in the working directory
+    with open(app_id.replace('.', '_') + "_report.txt", 'w') as f:
+        f.write("Unique IP found: " + str(get_no_of_elements(ip)) + '\n\n')
+        f.write("Unique Hostnames found: " + str(get_no_of_elements(hosts)) + '\n\n')
+        f.write('Hostnames with no. of occurrence in  file: \n\n')
+        for key, value in (sorted(hosts.items(), key=lambda x: x[1], reverse=True)):
+            f.write('%s:%s\n' % (key, value))
+        f.write('\n Unique IP addresses found in file: \n\n')
+        f.write(str(ip))
+        pprint.pprint('Report generated successfully!(in current working directory)')
+elif answer == "n":
+    pass
 
-# ip_address list generate
+# asking user if they want to generate & save wordcloud
+answer = input("Do you want to  Display  & save the WorldCloud image(y/n): ").lower().strip()
+if answer == "y":
+    # wordcloud
+    wordcloud = WordCloud(mode='RGBA',
+                          background_color='rgba(255, 255, 255, 0)').generate_from_frequencies(hosts)
 
-f = open(file_path, 'rb')
-doc = str(f.read())
+    # Image process
+    image = Image.fromarray(wordcloud.to_array())
+    background = Image.open('darth-vader.png').convert('RGBA')
+    image = image.resize(background.size)
+    background = background.resize(image.size)
+    new_image = Image.alpha_composite(background, image)
 
-ip_addresses = list((re.findall(r'[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3} ', doc)))
-ip_addr = []
-for unique_ip in ip_addresses:
-    if unique_ip not in ip_addr:
-        ip_addr.append(unique_ip)
-pprint.pprint(ip_addr)
+    # display wordcloud image
+    plt.figure(figsize=(15, 8))
+    plt.axis('off')
+    plt.imshow(new_image)
+    plt.show()
 
-# generating a Report.txt in the working directory
-with open("Generated_report.txt", 'w') as f:
-    f.write("Unique IP found: " + str(get_no_of_elements(ip_addr)) + '\n\n')
-    f.write("Unique Hostnames found: " + str(get_no_of_elements(freq)) + '\n\n')
-    f.write('Hostnames with no. of occurrence in  file: \n\n')
-    for key, value in (sorted(freq.items(), key=lambda x: x[1], reverse=True)):
-        f.write('%s:%s\n' % (key, value))
-    f.write('\n Unique IP addresses found in file: \n\n')
-    f.write(str(ip_addr))
-pprint.pprint("Unique Hostnames found: " + str(get_no_of_elements(freq)))
-pprint.pprint("Unique IP found: " + str(get_no_of_elements(ip_addr)))
-pprint.pprint('Report generated successfully!(in current working directory)')
+    # Save the wordcloud image
+    plt.figure()
+    plt.axis('off')
+    fig = plt.imshow(new_image, interpolation='nearest')
+    fig.axes.get_xaxis().set_visible(False)
+    fig.axes.get_yaxis().set_visible(False)
+    plt.savefig(app_id.replace('.', '_')+'.png',
+                bbox_inches='tight',
+                pad_inches=0,
+                format='png',
+                dpi=1000)
+    pprint.pprint('Image saved')
 
+elif answer == "n":
+    exit()
