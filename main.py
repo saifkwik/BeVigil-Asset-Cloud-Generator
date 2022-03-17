@@ -50,15 +50,6 @@ def to_dict(assets):
             frequencies[word] += 1
     return frequencies
 
-
-# function to count no. of unique elements
-def get_no_of_elements(l):
-    count = 0
-    for element in l:
-        count += 1
-    return count
-
-
 # app_id input from user
 app_id = input('Enter APP ID here (com.example.com) : ').lower().strip()
 
@@ -82,16 +73,16 @@ hosts = to_dict(assets)
 hosts = dict([(k, v) for k, v in hosts.items() if len(k) > 0])
 pprint.pprint(sorted(hosts.items(), key=lambda x: x[1], reverse=True))
 
-pprint.pprint("Unique Hostnames found: " + str(get_no_of_elements(hosts)))
-pprint.pprint("Unique IP found: " + str(get_no_of_elements(ip)))
+pprint.pprint("Unique Hostnames found: " + str(len(hosts)))
+pprint.pprint("Unique IP found: " + str(len(ip)))
 
 # asking user if they want to generate a report
 answer = input("Do you want to Generate a report(y/n): ").lower().strip()
 if answer == "y":
     # generating a Report.txt in the working directory
     with open(app_id.replace('.', '_') + "_report.txt", 'w') as f:
-        f.write("Unique IP found: " + str(get_no_of_elements(ip)) + '\n\n')
-        f.write("Unique Hostnames found: " + str(get_no_of_elements(hosts)) + '\n\n')
+        f.write("Unique IP found: " + str(len(ip)) + '\n\n')
+        f.write("Unique Hostnames found: " + str(len(hosts)) + '\n\n')
         f.write('Hostnames with no. of occurrence in  file: \n\n')
         for key, value in (sorted(hosts.items(), key=lambda x: x[1], reverse=True)):
             f.write('%s:%s\n' % (key, value))
