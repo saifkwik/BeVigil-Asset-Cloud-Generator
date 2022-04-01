@@ -50,9 +50,9 @@ def to_dict(assets):
             frequencies[word] += 1
     return frequencies
 
+
 # app_id input from user
 app_id = input('Enter APP ID here (com.example.com) : ').lower().strip()
-
 
 data = get_data(app_id)
 
@@ -118,7 +118,7 @@ if answer == "y":
     fig = plt.imshow(new_image, interpolation='nearest')
     fig.axes.get_xaxis().set_visible(False)
     fig.axes.get_yaxis().set_visible(False)
-    plt.savefig(app_id.replace('.', '_')+'.png',
+    plt.savefig(app_id.replace('.', '_') + '.png',
                 bbox_inches='tight',
                 pad_inches=0,
                 format='png',
